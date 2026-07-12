@@ -4,6 +4,7 @@ import { db } from '@/lib/db'; // Adjust this path to where your db instance is 
 import { students } from '@/lib/db/schema'; // Adjust this path to your schema file
 import { desc, eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { requireAdmin, UnauthorizedAdminError } from '@/lib/auth/require-admin';
 
 // Use Drizzle's utility to infer the required insert types, 
 // omitting auto-generated fields like id and timestamps.
@@ -11,6 +12,8 @@ export type AddStudentInput = typeof students.$inferInsert;
 
 export async function addStudentAction(data: Omit<AddStudentInput, 'id' | 'createdAt' | 'updatedAt'>) {
   try {
+    await requireAdmin();
+
     // 1. Insert the record into the database
     const [newStudent] = await db.insert(students).values({
       studentId: data.studentId,
@@ -32,6 +35,13 @@ export async function addStudentAction(data: Omit<AddStudentInput, 'id' | 'creat
 
   } catch (error) {
     console.error('Failed to add student:', error);
+
+    if (error instanceof UnauthorizedAdminError) {
+      return {
+        success: false,
+        message: 'Please sign in to continue.',
+      };
+    }
     
     // Handle specific database errors (like duplicate studentId)
     if (error instanceof Error && error.message.includes('duplicate key')) {
@@ -48,6 +58,8 @@ export async function addStudentAction(data: Omit<AddStudentInput, 'id' | 'creat
 
 export async function getStudentsAction() {
   try {
+    await requireAdmin();
+
     // Fetch all students, ordered by most recent first
     const allStudents = await db.select().from(students).orderBy(desc(students.createdAt));
 
@@ -57,6 +69,9 @@ export async function getStudentsAction() {
     };
   } catch (error) {
     console.error('Failed to fetch students:', error);
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+      return { success: false, message: 'Please sign in to continue.', data: [], unauthorized: true };
+   }
     return {
       success: false,
       message: 'Could not retrieve student registry.',
@@ -99,6 +114,8 @@ export async function getStudentByStudentIdAction(studentId: string) {
 
 export async function deleteStudentAction(id: number) {
   try {
+    await requireAdmin();
+
     // 1. Delete the record where the numeric primary key matches
     await db.delete(students).where(eq(students.id, id));
 
@@ -130,6 +147,8 @@ export interface UpdateStudentInput {
 
 export async function updateStudentAction(data: UpdateStudentInput) {
   try {
+    await requireAdmin();
+
     // 1. Update the record where the numeric primary key matches
     const [updatedStudent] = await db
       .update(students)

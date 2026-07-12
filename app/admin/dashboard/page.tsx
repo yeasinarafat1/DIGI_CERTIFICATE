@@ -26,12 +26,14 @@ import QRCodeModal from '@/components/QRCodeModal';
 // Added updateStudentAction to imports
 import { addStudentAction, deleteStudentAction, getStudentsAction, updateStudentAction } from '@/lib/action/student';
 import { Student } from '@/lib/db/schema';
+import { signOut, useSession } from '@/lib/auth-client';
 
 type SortField = 'studentId' | 'name' | 'courseName' | 'batchNo' | 'startDate' | 'endDate';
 type SortOrder = 'asc' | 'desc';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   
   const [students, setStudents] = useState<Student[]>([]);
   const [activeTab, setActiveTab] = useState<'students' | 'overview'>('students');
@@ -87,8 +89,8 @@ export default function AdminDashboardPage() {
     }
 
     result.sort((a, b) => {
-      let valA = String(a[sortField]).toLowerCase();
-      let valB = String(b[sortField]).toLowerCase();
+      const valA = String(a[sortField]).toLowerCase();
+      const valB = String(b[sortField]).toLowerCase();
       
       if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
       if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
@@ -105,11 +107,8 @@ export default function AdminDashboardPage() {
 
   const totalPages = Math.max(1, Math.ceil(processedStudents.length / itemsPerPage));
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
-
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOut();
     router.push('/admin/login');
   };
 
@@ -232,8 +231,8 @@ export default function AdminDashboardPage() {
                 AD
               </div>
               <div className="overflow-hidden">
-                <p className="text-xs font-semibold truncate text-white">Administrator</p>
-                <p className="text-[10px] text-gray-400 truncate">admin@apexacademy.edu</p>
+                <p className="text-xs font-semibold truncate text-white">{session?.user.name || 'Administrator'}</p>
+                <p className="text-[10px] text-gray-400 truncate">{session?.user.email || 'Signed in'}</p>
               </div>
             </div>
             
@@ -307,7 +306,10 @@ export default function AdminDashboardPage() {
                   type="text"
                   placeholder="Search ID, name, course or batch..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5F5D] focus:border-[#2D5F5D] transition-all text-xs outline-none shadow-sm"
                 />
               </div>

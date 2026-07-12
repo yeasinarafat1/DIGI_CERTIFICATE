@@ -25,31 +25,39 @@ export default function StudentFormModal({ student, existingStudents, onClose, o
   const [error, setError] = useState('');
 
   // Suggestions for auto ID
-  const suggestNewId = () => {
+  const createSuggestedId = () => {
     const years = new Date().getFullYear();
     const randomNum = Math.floor(100 + Math.random() * 900);
-    setId(`ST-${years}-${randomNum}`);
+    return `ST-${years}-${randomNum}`;
+  };
+
+  const suggestNewId = () => {
+    setId(createSuggestedId());
   };
 
   useEffect(() => {
-    if (student) {
-      // Safely access studentId (fallback to id if types get mixed up during transition)
-      setId(String(student.studentId || student.id));
-      setName(student.name);
-      setCourseName(student.courseName);
-      setBatchNo(student.batchNo);
-      setStartDate(student.startDate);
-      setEndDate(student.endDate);
-    } else {
-      // Pre-fill with empty or auto suggest
-      setName('');
-      setCourseName('');
-      setBatchNo('');
-      setStartDate('');
-      setEndDate('');
-      suggestNewId();
-    }
-    setError('');
+    const timeoutId = window.setTimeout(() => {
+      if (student) {
+        // Safely access studentId (fallback to id if types get mixed up during transition)
+        setId(student.studentId);
+        setName(student.name);
+        setCourseName(student.courseName);
+        setBatchNo(student.batchNo);
+        setStartDate(student.startDate);
+        setEndDate(student.endDate);
+      } else {
+        // Pre-fill with empty or auto suggest
+        setId(createSuggestedId());
+        setName('');
+        setCourseName('');
+        setBatchNo('');
+        setStartDate('');
+        setEndDate('');
+      }
+      setError('');
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [student]);
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -72,14 +72,6 @@ export function saveStudents(students: Student[]): void {
   localStorage.setItem('cvs_students', JSON.stringify(students));
 }
 
-export function getAdminSession(): boolean {
-  return localStorage.getItem('cvs_admin_auth') === 'true';
-}
-
-export function saveAdminSession(isAuthenticated: boolean): void {
-  localStorage.setItem('cvs_admin_auth', isAuthenticated ? 'true' : 'false');
-}
-
 export function formatDate(dateStr: string): string {
   if (!dateStr) return '';
   const parts = dateStr.split('-');
