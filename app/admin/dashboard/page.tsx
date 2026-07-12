@@ -33,7 +33,7 @@ type SortOrder = 'asc' | 'desc';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, isPending: sessionPending } = useSession();
   
   const [students, setStudents] = useState<Student[]>([]);
   const [activeTab, setActiveTab] = useState<'students' | 'overview'>('students');
@@ -50,6 +50,10 @@ export default function AdminDashboardPage() {
   const [selectedQRStudent, setSelectedQRStudent] = useState<Student | null>(null);
 
   useEffect(() => {
+    if (sessionPending || !session?.user) {
+      return;
+    }
+
     const loadInitialData = async () => {
       const result = await getStudentsAction();
       if (result.success && result.data) {
@@ -60,7 +64,7 @@ export default function AdminDashboardPage() {
     };
     
     loadInitialData();
-  }, []);
+  }, [sessionPending, session?.user]);
 
   const totalStudents = students.length;
   const totalBatches = useMemo(() => new Set(students.map(s => s.batchNo.trim().toUpperCase())).size, [students]);
