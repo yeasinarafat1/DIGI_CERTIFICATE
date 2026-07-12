@@ -1,0 +1,3 @@
+- You have done Excelent work seting up admin login
+- But want you take the seeed function and make it a server action if there is no admin found give the user to create a admin 
+- in your absence I have made some changes to the app which are present in progress.md you after changing update it
