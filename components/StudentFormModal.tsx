@@ -39,7 +39,7 @@ export default function StudentFormModal({ student, existingStudents, onClose, o
     const timeoutId = window.setTimeout(() => {
       if (student) {
         // Safely access studentId (fallback to id if types get mixed up during transition)
-        setId(String(student.studentId || student.id));
+        setId(student.studentId);
         setName(student.name);
         setCourseName(student.courseName);
         setBatchNo(student.batchNo);

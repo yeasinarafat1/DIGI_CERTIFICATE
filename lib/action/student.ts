@@ -4,7 +4,7 @@ import { db } from '@/lib/db'; // Adjust this path to where your db instance is 
 import { students } from '@/lib/db/schema'; // Adjust this path to your schema file
 import { desc, eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import { requireAdmin } from '@/lib/auth/require-admin';
+import { requireAdmin, UnauthorizedAdminError } from '@/lib/auth/require-admin';
 
 // Use Drizzle's utility to infer the required insert types, 
 // omitting auto-generated fields like id and timestamps.
@@ -35,6 +35,13 @@ export async function addStudentAction(data: Omit<AddStudentInput, 'id' | 'creat
 
   } catch (error) {
     console.error('Failed to add student:', error);
+
+    if (error instanceof UnauthorizedAdminError) {
+      return {
+        success: false,
+        message: 'Please sign in to continue.',
+      };
+    }
     
     // Handle specific database errors (like duplicate studentId)
     if (error instanceof Error && error.message.includes('duplicate key')) {
@@ -62,6 +69,9 @@ export async function getStudentsAction() {
     };
   } catch (error) {
     console.error('Failed to fetch students:', error);
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+      return { success: false, message: 'Please sign in to continue.', data: [], unauthorized: true };
+   }
     return {
       success: false,
       message: 'Could not retrieve student registry.',
