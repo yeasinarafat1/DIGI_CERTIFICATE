@@ -18,20 +18,24 @@ export function AdminLoginForm() {
     setError('');
     setIsLoading(true);
 
-    const { error: signInError } = await signIn.email({
-      email: email.trim(),
-      password,
-    });
+  try {
+      const { error: signInError } = await signIn.email({
+        email: email.trim().toLowerCase(),
+        password,
+      });
 
-    setIsLoading(false);
+      if (signInError) {
+        setError(signInError.message || 'Invalid admin credentials.');
+        return;
+      }
 
-    if (signInError) {
-      setError(signInError.message || 'Invalid admin credentials.');
-      return;
+      router.push('/admin/dashboard');
+    } catch {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-
-    router.push('/admin/dashboard');
-  };
+   };
 
   return (
     <form onSubmit={handleSubmit} className="p-8 space-y-6">

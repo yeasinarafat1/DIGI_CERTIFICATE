@@ -9,6 +9,7 @@ import { TRAINING_CENTER_NAME } from '@/utils';
 export default async function AdminLoginPage() {
   await connection();
   const adminExists = await hasAdmins();
+  const setupToken = process.env.ADMIN_SETUP_TOKEN ?? '';
 
   return (
     <div className="relative min-h-[85vh] flex items-center justify-center px-4 overflow-hidden">
@@ -37,7 +38,7 @@ export default async function AdminLoginPage() {
           </p>
         </div>
 
-        {adminExists ? <AdminLoginForm /> : <CreateAdminForm />}
+        {adminExists ? <AdminLoginForm /> : <CreateAdminForm setupToken={setupToken} />}
       </div>
     </div>
   );

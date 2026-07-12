@@ -1,6 +1,7 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { ShieldPlus, UserPlus } from 'lucide-react';
 import {
   createFirstAdminAction,
@@ -12,14 +13,32 @@ const createFirstAdminInitialState: CreateFirstAdminState = {
   message: '',
 };
 
-export function CreateAdminForm() {
+type CreateAdminFormProps = {
+  setupToken: string;
+};
+
+export function CreateAdminForm({ setupToken }: CreateAdminFormProps) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(
     createFirstAdminAction,
     createFirstAdminInitialState,
   );
 
+  useEffect(() => {
+    if (!state.success) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      router.refresh();
+    }, 500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [router, state.success]);
+
   return (
     <form action={formAction} className="p-8 space-y-6">
+      <input type="hidden" name="setupToken" value={setupToken} />
       <div className="text-center">
         <h3 className="text-xl font-bold text-[#1B3A5C] flex items-center justify-center gap-2">
           <ShieldPlus className="w-5 h-5 text-[#2D5F5D]" />
