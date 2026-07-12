@@ -13,11 +13,6 @@ export interface Student {
   createdAt: string; // ISO date string
 }
 
-export interface AdminUser {
-  username: string;
-  isAuthenticated: boolean;
-}
-
 export type RouteType = 'home' | 'admin-login' | 'admin-dashboard' | 'verify';
 
 export interface RouteState {

@@ -4,33 +4,35 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ShieldCheck, LogIn, Award } from 'lucide-react';
-// Note: Adjust this import path based on your Next.js project structure (e.g., '@/lib/utils')
-import { TRAINING_CENTER_NAME, saveAdminSession } from '@/utils';
-''
+import { signIn } from '@/lib/auth-client';
+import { TRAINING_CENTER_NAME } from '@/utils';
+
 export default function AdminLoginPage() {
   const router = useRouter();
   
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // Simulate login verification
-    setTimeout(() => {
-      if (username.trim().toLowerCase() === 'admin' && password === 'admin') {
-        saveAdminSession(true);
-        // Redirect to the admin dashboard upon success
-        router.push('/admin/dashboard'); 
-      } else {
-        setError('Invalid admin credentials. Hint: Use admin / admin');
-        setIsLoading(false);
-      }
-    }, 600);
+    const { error: signInError } = await signIn.email({
+      email: email.trim(),
+      password,
+    });
+
+    setIsLoading(false);
+
+    if (signInError) {
+      setError(signInError.message || 'Invalid admin credentials.');
+      return;
+    }
+
+    router.push('/admin/dashboard');
   };
 
   return (
@@ -79,17 +81,17 @@ export default function AdminLoginPage() {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-[#1B3A5C] uppercase tracking-wider mb-2" htmlFor="username">
-                Username
+              <label className="block text-xs font-semibold text-[#1B3A5C] uppercase tracking-wider mb-2" htmlFor="email">
+                Email
               </label>
               <input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-4 py-3 bg-[#FAF8F5] border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5F5D] focus:border-[#2D5F5D] transition-all text-sm outline-none"
-                placeholder="Enter admin username"
+                placeholder="admin@example.com"
               />
             </div>
 
@@ -124,11 +126,6 @@ export default function AdminLoginPage() {
             )}
           </button>
 
-          <div className="bg-[#FAF8F5] border border-gray-100 rounded-xl p-3 text-center">
-            <span className="text-[11px] font-medium text-gray-500">
-              Demo Credentials: <span className="font-bold text-[#1B3A5C]">admin</span> / <span className="font-bold text-[#1B3A5C]">admin</span>
-            </span>
-          </div>
         </form>
       </div>
     </div>
