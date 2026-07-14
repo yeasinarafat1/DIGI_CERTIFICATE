@@ -16,6 +16,7 @@ import {
 import { formatDate, TRAINING_CENTER_NAME } from '@/utils';
 import { getStudentByStudentIdAction } from '@/lib/action/student';
 import { Student } from '@/lib/db/schema';
+import Image from 'next/image';
 
 export default function PublicVerifyPage() {
   const router = useRouter();
@@ -63,23 +64,6 @@ export default function PublicVerifyPage() {
       <div className="absolute top-0 right-0 w-80 h-80 bg-[#E8785A] opacity-[0.07] rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#8FBC9A] opacity-[0.07] rounded-full blur-3xl pointer-events-none -ml-24 -mb-24" />
 
-      {/* Header */}
-      <header className="max-w-2xl mx-auto w-full flex items-center justify-between mb-8 relative z-10">
-        <button
-          onClick={() => router.push('/')}
-          className="flex items-center gap-2 text-xs font-semibold text-[#1B3A5C] hover:text-[#2D5F5D] transition-colors bg-white/60 hover:bg-white px-3.5 py-2 rounded-xl border border-gray-100 backdrop-blur-sm cursor-pointer shadow-sm"
-        >
-          <Compass className="w-3.5 h-3.5" />
-          Home / Search
-        </button>
-
-        <button
-          onClick={() => router.push('/admin/login')}
-          className="text-xs font-semibold text-[#2D5F5D] hover:text-[#1B3A5C] transition-colors bg-white/60 hover:bg-white px-3.5 py-2 rounded-xl border border-gray-100 backdrop-blur-sm cursor-pointer shadow-sm"
-        >
-          Admin Portal
-        </button>
-      </header>
 
       <div className="flex-1 flex items-center justify-center max-w-lg mx-auto w-full relative z-10 mb-8">
         
@@ -117,8 +101,9 @@ export default function PublicVerifyPage() {
 
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-gray-100 relative z-10 text-center sm:text-left">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#1B3A5C] rounded-xl flex items-center justify-center shrink-0 shadow-md">
-                    <Award className="w-7 h-7 text-[#8FBC9A]" />
+                  <div className="w-12 h-12  rounded-xl flex items-center justify-center shrink-0 shadow-md">
+                    {/* <Award className="w-7 h-7 text-[#8FBC9A]" /> */}
+                    <Image src="/logo.png" alt="Logo" width={28} height={28} className="object-contain" />
                   </div>
                   <div>
                     <h1 className="text-lg font-extrabold text-[#1B3A5C] tracking-tight">{TRAINING_CENTER_NAME}</h1>
