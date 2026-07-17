@@ -46,7 +46,7 @@ export default function StudentCertificate({ data }: { data: Certificate }) {
         <div className="space-y-2">
           <p className="text-xs text-gray-500 italic">has successfully completed the training program in</p>
           <h3 className="text-lg md:text-xl font-bold text-gray-900 px-4 leading-snug">{data.courseName}</h3>
-          <p className="text-xs font-semibold text-[#1B3A5C]">Conducted by {TRAINING_CENTER_NAME}</p>
+          <p className="text-xs font-semibold text-[#1B3A5C]">Conducted by {TRAINING_CENTER_NAME} IT</p>
         </div>
       </div>
 

@@ -48,7 +48,7 @@ export default function MentorCertificate({ data }: { data: Certificate }) {
                    </div>
           <div>
             <h1 className="text-xs sm:text-[13px] md:text-base font-bold tracking-[0.1em] sm:tracking-[0.12em] font-gothic text-[#0F4E3A]">
-              {TRAINING_CENTER_NAME.toUpperCase()}
+              {TRAINING_CENTER_NAME.toUpperCase()} 
             </h1>
             <p className="text-[6px] sm:text-[8px] text-slate-400 uppercase tracking-[0.18em] sm:tracking-[0.2em] font-medium mt-0.5">
               Suagazi Bazar, Sadar South, Cumilla-3504
@@ -75,7 +75,7 @@ export default function MentorCertificate({ data }: { data: Certificate }) {
 
         {/* Recipient Name */}
         <div className="space-y-1 py-0.5">
-          <h2 className="text-xl sm:text-3xl md:text-4xl font-cursive text-[#C5A059] font-normal leading-tight filter drop-shadow-[0_1px_1px_rgba(0,0,0,0.05)]">
+          <h2 className="text-xl sm:text-3xl md:text-4xl font-cursive text-[#C5A059] font-bold leading-tight filter drop-shadow-[0_1px_1px_rgba(0,0,0,0.05)]">
             {data.name}
           </h2>
           {/* Artistic Name Underline */}
@@ -97,7 +97,7 @@ export default function MentorCertificate({ data }: { data: Certificate }) {
           </h3>
           
           <p className="text-[7px] sm:text-[9px] font-bold tracking-widest uppercase text-[#0F4E3A]">
-            Acknowledged and Honored by {TRAINING_CENTER_NAME}
+            Acknowledged and Honored by {TRAINING_CENTER_NAME} IT
           </p>
         </div>
 
@@ -162,9 +162,7 @@ export default function MentorCertificate({ data }: { data: Certificate }) {
           
           {/* Handwritten Signature Simulator */}
           <div className="relative py-0.5 h-7 flex items-center">
-            <span className="font-cursive text-xl sm:text-2xl text-slate-800 font-medium select-none -rotate-2 transform">
-              Ataher Jamil
-            </span>
+            <Image src="/signature.png" alt="Signature" width={80} height={30} className="object-contain" />
             {/* Soft blue pen stroke simulator */}
             <div className="absolute bottom-0 right-0 w-20 sm:w-28 h-[1px] bg-[#1E3A8A]/25 -rotate-1 pointer-events-none" />
           </div>
