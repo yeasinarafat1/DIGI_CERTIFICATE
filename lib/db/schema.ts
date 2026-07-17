@@ -66,3 +66,22 @@ export const students = pgTable('students', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 export type Student = typeof students.$inferSelect;
+
+
+export const certificates = pgTable('certificates', {
+  id: serial('id').primaryKey(),
+  certificateId: varchar('certificate_id', { length: 30 }).unique().notNull(),
+  name: text('name').notNull(),
+  
+  // THE NEW FIELD: defaults to 'student' so existing data doesn't break
+  role: varchar('role', { length: 20 }).notNull().default('student'), 
+  
+  courseName: text('course_name').notNull(),
+  batchNo: varchar('batch_no', { length: 20 }).notNull(),
+  startDate: date('start_date').notNull(),
+  endDate: date('end_date').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export type Certificate = typeof certificates.$inferSelect;

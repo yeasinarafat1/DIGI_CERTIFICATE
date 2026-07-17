@@ -5,7 +5,7 @@
 
 import { Student } from '@/types';
 
-export const TRAINING_CENTER_NAME = "Digi Learning";
+export const TRAINING_CENTER_NAME = "DigiLearning";
 
 const DEFAULT_STUDENTS: Student[] = [
   {

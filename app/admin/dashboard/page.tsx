@@ -2,52 +2,61 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Award, 
-  Search, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  QrCode, 
-  LogOut, 
-  Users, 
-  FolderGit, 
+import {
+  Award,
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  QrCode,
+  LogOut,
+  Users,
+  FolderGit,
   GraduationCap,
-  ArrowUpDown, 
-  ChevronLeft, 
+  ArrowUpDown,
+  ChevronLeft,
   ChevronRight,
   User,
-  ExternalLink
+  ExternalLink,
+  BadgeCheck
 } from 'lucide-react';
 
 import { formatDate } from '@/utils';
-import StudentFormModal from '@/components/StudentFormModal';
+import StudentFormModal from '@/components/CertificateFormModal'; // Consider renaming this component to CertificateFormModal later
 import QRCodeModal from '@/components/QRCodeModal';
-// Added updateStudentAction to imports
-import { addStudentAction, deleteStudentAction, getStudentsAction, updateStudentAction } from '@/lib/action/student';
-import { Student } from '@/lib/db/schema';
-import { signOut, useSession } from '@/lib/auth-client';
 
-type SortField = 'studentId' | 'name' | 'courseName' | 'batchNo' | 'startDate' | 'endDate';
+// Import the updated certificate actions
+import {
+  addCertificateAction,
+  deleteCertificateAction,
+  getCertificatesAction,
+  updateCertificateAction
+} from '@/lib/action/certificate';
+import { Certificate } from '@/lib/db/schema';
+import { signOut, useSession } from '@/lib/auth-client';
+import CertificateFormModal from '@/components/CertificateFormModal';
+
+// Updated sort fields to match the new schema
+type SortField = 'certificateId' | 'role' | 'name' | 'courseName' | 'batchNo' | 'startDate' | 'endDate';
 type SortOrder = 'asc' | 'desc';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { data: session, isPending: sessionPending } = useSession();
-  
-  const [students, setStudents] = useState<Student[]>([]);
-  const [activeTab, setActiveTab] = useState<'students' | 'overview'>('students');
+
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [activeTab, setActiveTab] = useState<'certificates' | 'overview'>('certificates');
   const [searchQuery, setSearchQuery] = useState('');
-  
-  const [sortField, setSortField] = useState<SortField>('studentId');
+
+  const [sortField, setSortField] = useState<SortField>('certificateId');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [editingCertificate, setEditingCertificate] = useState<Certificate | null>(null);
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
-  const [selectedQRStudent, setSelectedQRStudent] = useState<Student | null>(null);
+  const [selectedQRCertificate, setSelectedQRCertificate] = useState<Certificate | null>(null);
 
   useEffect(() => {
     if (sessionPending || !session?.user) {
@@ -55,20 +64,20 @@ export default function AdminDashboardPage() {
     }
 
     const loadInitialData = async () => {
-      const result = await getStudentsAction();
+      const result = await getCertificatesAction();
       if (result.success && result.data) {
-        setStudents(result.data as unknown as Student[]);
+        setCertificates(result.data as unknown as Certificate[]);
       } else {
-        console.error("Failed to load students:", result.message);
+        console.error("Failed to load certificates:", result.message);
       }
     };
-    
+
     loadInitialData();
   }, [sessionPending, session?.user]);
 
-  const totalStudents = students.length;
-  const totalBatches = useMemo(() => new Set(students.map(s => s.batchNo.trim().toUpperCase())).size, [students]);
-  const activeCourses = useMemo(() => new Set(students.map(s => s.courseName.trim())).size, [students]);
+  const totalCertificates = certificates.length;
+  const totalBatches = useMemo(() => new Set(certificates.map(c => c.batchNo.trim().toUpperCase())).size, [certificates]);
+  const activeCourses = useMemo(() => new Set(certificates.map(c => c.courseName.trim())).size, [certificates]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -79,113 +88,116 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const processedStudents = useMemo(() => {
-    let result = [...students];
+  const processedCertificates = useMemo(() => {
+    let result = [...certificates];
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(s => 
-        String(s.studentId).toLowerCase().includes(q) || 
-        s.name.toLowerCase().includes(q) ||
-        s.courseName.toLowerCase().includes(q) ||
-        s.batchNo.toLowerCase().includes(q)
+      result = result.filter(c =>
+        String(c.certificateId).toLowerCase().includes(q) ||
+        c.name.toLowerCase().includes(q) ||
+        c.role.toLowerCase().includes(q) ||
+        c.courseName.toLowerCase().includes(q) ||
+        c.batchNo.toLowerCase().includes(q)
       );
     }
 
     result.sort((a, b) => {
       const valA = String(a[sortField]).toLowerCase();
       const valB = String(b[sortField]).toLowerCase();
-      
+
       if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
       if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
       return 0;
     });
 
     return result;
-  }, [students, searchQuery, sortField, sortOrder]);
+  }, [certificates, searchQuery, sortField, sortOrder]);
 
-  const paginatedStudents = useMemo(() => {
+  const paginatedCertificates = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return processedStudents.slice(startIndex, startIndex + itemsPerPage);
-  }, [processedStudents, currentPage]);
-
-  const totalPages = Math.max(1, Math.ceil(processedStudents.length / itemsPerPage));
+    return processedCertificates.slice(startIndex, startIndex + itemsPerPage);
+  }, [processedCertificates, currentPage]);
+  const totalPages = Math.max(1, Math.ceil(processedCertificates.length / itemsPerPage));
+  useEffect(() => {
+    setCurrentPage(page => Math.min(page, totalPages));
+  }, [totalPages]);
 
   const handleLogout = async () => {
     await signOut();
     router.push('/admin/login');
   };
 
-  const handleSaveStudent = async (savedStudent: Student) => {
-    // Check if we are in EDIT mode by seeing if the numeric DB 'id' exists
-    const isEditMode = !!savedStudent.id; 
-    
+  const handleSaveCertificate: (savedCertificate: Certificate) => Promise<void> = async (savedCertificate: Certificate) => {
+    const isEditMode = !!savedCertificate.id;
+
     if (isEditMode) {
       // --- EDIT MODE ---
       try {
-        const result = await updateStudentAction({
-          id: savedStudent.id, // The numeric primary key
-          studentId: savedStudent.studentId, // Match schema
-          name: savedStudent.name,
-          courseName: savedStudent.courseName,
-          batchNo: savedStudent.batchNo,
-          startDate: savedStudent.startDate,
-          endDate: savedStudent.endDate,
+        const result = await updateCertificateAction({
+          id: savedCertificate.id,
+          certificateId: savedCertificate.certificateId,
+          role: savedCertificate.role, // Pass the new role field
+          name: savedCertificate.name,
+          courseName: savedCertificate.courseName,
+          batchNo: savedCertificate.batchNo,
+          startDate: savedCertificate.startDate,
+          endDate: savedCertificate.endDate,
         });
 
-        if (result.success && result.student) {
-          // Replace the old record with the fresh one from the DB
-          const updated = students.map(s => s.id === savedStudent.id ? (result.student as unknown as Student) : s);
-          setStudents(updated);
+        if (result.success && result.certificate) {
+          const updated = certificates.map(c => c.id === savedCertificate.id ? (result.certificate as unknown as Certificate) : c);
+          setCertificates(updated);
           setIsFormModalOpen(false);
-          setEditingStudent(null);
+          setEditingCertificate(null);
         } else {
           alert(`Failed to update: ${result.message}`);
         }
       } catch (error) {
-        console.error("Error updating student:", error);
+        console.error("Error updating certificate:", error);
         alert("An unexpected error occurred during the update.");
       }
     } else {
       // --- ADD MODE ---
       try {
-        const result = await addStudentAction({
-          studentId: savedStudent.studentId, 
-          name: savedStudent.name,
-          courseName: savedStudent.courseName,
-          batchNo: savedStudent.batchNo,
-          startDate: savedStudent.startDate,
-          endDate: savedStudent.endDate,
+        const result = await addCertificateAction({
+          certificateId: savedCertificate.certificateId,
+          role: savedCertificate.role, // Pass the new role field
+          name: savedCertificate.name,
+          courseName: savedCertificate.courseName,
+          batchNo: savedCertificate.batchNo,
+          startDate: savedCertificate.startDate,
+          endDate: savedCertificate.endDate,
         });
 
-        if (result.success && result.student) {
-          const updated = [result.student as unknown as Student, ...students];
-          setStudents(updated);
+        if (result.success && result.certificate) {
+          const updated = [result.certificate as unknown as Certificate, ...certificates];
+          setCertificates(updated);
           setIsFormModalOpen(false);
-          setEditingStudent(null);
+          setEditingCertificate(null);
         } else {
-          alert(`Failed to add student: ${result.message}`);
+          alert(`Failed to add record: ${result.message}`);
         }
       } catch (error) {
-        console.error("Error saving student:", error);
+        console.error("Error saving record:", error);
         alert("An unexpected error occurred.");
       }
     }
   };
 
-  const handleDeleteClick = async (student: Student) => {
-    if (window.confirm(`Are you sure you want to delete the certificate for ${student.name} (ID: ${student.studentId})? This action cannot be undone.`)) {
+  const handleDeleteClick = async (certificate: Certificate) => {
+    if (window.confirm(`Are you sure you want to delete the certificate for ${certificate.name} (ID: ${certificate.certificateId})? This action cannot be undone.`)) {
       try {
-        const result = await deleteStudentAction(student.id);
+        const result = await deleteCertificateAction(certificate.id);
 
         if (result.success) {
-          const updated = students.filter(s => s.id !== student.id);
-          setStudents(updated);
+          const updated = certificates.filter(c => c.id !== certificate.id);
+          setCertificates(updated);
         } else {
           alert(`Failed to delete: ${result.message}`);
         }
       } catch (error) {
-        console.error("Error deleting student:", error);
+        console.error("Error deleting record:", error);
         alert("An unexpected error occurred while deleting the record.");
       }
     }
@@ -209,15 +221,14 @@ export default function AdminDashboardPage() {
 
           <nav className="flex-1 px-4 py-6 space-y-1">
             <button
-              onClick={() => setActiveTab('students')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-left cursor-pointer ${
-                activeTab === 'students' 
-                  ? 'bg-[#2D5F5D] text-white shadow-md' 
+              onClick={() => setActiveTab('certificates')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-left cursor-pointer ${activeTab === 'certificates'
+                  ? 'bg-[#2D5F5D] text-white shadow-md'
                   : 'text-gray-300 hover:bg-white/5 hover:text-white'
-              }`}
+                }`}
             >
-              <Users className="w-4 h-4" />
-              Students & Credentials
+              <BadgeCheck className="w-4 h-4" />
+              Registry Records
             </button>
 
             <button
@@ -239,7 +250,7 @@ export default function AdminDashboardPage() {
                 <p className="text-[10px] text-gray-400 truncate">{session?.user.email || 'Signed in'}</p>
               </div>
             </div>
-            
+
             <button
               onClick={handleLogout}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-900/30 hover:bg-red-900/50 text-red-200 hover:text-red-100 rounded-xl text-xs font-semibold transition-all border border-red-500/10 cursor-pointer"
@@ -257,16 +268,16 @@ export default function AdminDashboardPage() {
                 Certificate Administration
               </h2>
               <p className="text-gray-500 text-xs mt-0.5">
-                Manage student registry records, generate secure verification QR codes, and issue new certificates.
+                Manage registry records, generate secure verification QR codes, and issue new certificates for Students & Mentors.
               </p>
             </div>
 
             <button
-              onClick={() => { setEditingStudent(null); setIsFormModalOpen(true); }}
+              onClick={() => { setEditingCertificate(null); setIsFormModalOpen(true); }}
               className="self-start px-5 py-3 bg-[#2D5F5D] hover:bg-[#204543] text-white font-semibold rounded-xl text-sm transition-all shadow-md flex items-center gap-2 cursor-pointer hover:shadow-lg transform active:scale-[0.98]"
             >
               <Plus className="w-4 h-4" />
-              Add New Student
+              Add New Record
             </button>
           </div>
 
@@ -276,8 +287,8 @@ export default function AdminDashboardPage() {
                 <Users className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">Total Students</p>
-                <h4 className="text-2xl font-bold text-[#1B3A5C] mt-0.5">{totalStudents}</h4>
+                <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">Total Records</p>
+                <h4 className="text-2xl font-bold text-[#1B3A5C] mt-0.5">{totalCertificates}</h4>
               </div>
             </div>
 
@@ -308,7 +319,7 @@ export default function AdminDashboardPage() {
                 <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
                 <input
                   type="text"
-                  placeholder="Search ID, name, course or batch..."
+                  placeholder="Search ID, name, role, course or batch..."
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
@@ -317,9 +328,9 @@ export default function AdminDashboardPage() {
                   className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5F5D] focus:border-[#2D5F5D] transition-all text-xs outline-none shadow-sm"
                 />
               </div>
-              
+
               <div className="text-xs text-gray-400 font-medium">
-                Showing {processedStudents.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, processedStudents.length)} of {processedStudents.length} entries
+                Showing {processedCertificates.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, processedCertificates.length)} of {processedCertificates.length} entries
               </div>
             </div>
 
@@ -327,8 +338,11 @@ export default function AdminDashboardPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-[#1B3A5C]/5 text-[#1B3A5C] text-[11px] font-bold uppercase tracking-wider border-b border-gray-100 select-none">
-                    <th onClick={() => handleSort('studentId')} className="p-4 cursor-pointer hover:bg-gray-100/50 transition-colors">
-                      <div className="flex items-center gap-1.5">Student ID <ArrowUpDown className="w-3 h-3 text-gray-400" /></div>
+                    <th onClick={() => handleSort('certificateId')} className="p-4 cursor-pointer hover:bg-gray-100/50 transition-colors">
+                      <div className="flex items-center gap-1.5">Certificate ID <ArrowUpDown className="w-3 h-3 text-gray-400" /></div>
+                    </th>
+                    <th onClick={() => handleSort('role')} className="p-4 cursor-pointer hover:bg-gray-100/50 transition-colors">
+                      <div className="flex items-center gap-1.5">Role <ArrowUpDown className="w-3 h-3 text-gray-400" /></div>
                     </th>
                     <th onClick={() => handleSort('name')} className="p-4 cursor-pointer hover:bg-gray-100/50 transition-colors">
                       <div className="flex items-center gap-1.5">Full Name <ArrowUpDown className="w-3 h-3 text-gray-400" /></div>
@@ -349,48 +363,56 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-xs">
-                  {paginatedStudents.length === 0 ? (
+                  {paginatedCertificates.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="p-8 text-center text-gray-400 font-medium">
+                      <td colSpan={8} className="p-8 text-center text-gray-400 font-medium">
                         No matching records found.
                       </td>
                     </tr>
                   ) : (
-                    paginatedStudents.map((student) => (
-                      <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="p-4 font-mono font-bold text-[#1B3A5C]">{student.studentId}</td>
+                    paginatedCertificates.map((certificate) => (
+                      <tr key={certificate.id} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="p-4 font-mono font-bold text-[#1B3A5C]">{certificate.certificateId}</td>
+                        <td className="p-4">
+                          <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md ${certificate.role === 'mentor'
+                              ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                              : 'bg-[#8FBC9A]/20 text-[#2D5F5D] border border-[#8FBC9A]/30'
+                            }`}>
+                            {certificate.role}
+                          </span>
+                        </td>
                         <td className="p-4 font-semibold text-gray-800">
                           <div className="flex items-center gap-2">
                             <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
                               <User className="w-3.5 h-3.5" />
                             </div>
-                            {student.name}
+                            {certificate.name}
                           </div>
                         </td>
-                        <td className="p-4 text-gray-600 font-medium">{student.courseName}</td>
+                        <td className="p-4 text-gray-600 font-medium">{certificate.courseName}</td>
                         <td className="p-4">
-                          <span className="px-2 py-1 bg-gray-100 text-gray-700 font-medium rounded-md">{student.batchNo}</span>
+                          <span className="px-2 py-1 bg-gray-100 text-gray-700 font-medium rounded-md">{certificate.batchNo}</span>
                         </td>
-                        <td className="p-4 text-gray-500">{formatDate(student.startDate)}</td>
-                        <td className="p-4 text-gray-500">{formatDate(student.endDate)}</td>
+                        <td className="p-4 text-gray-500">{formatDate(certificate.startDate)}</td>
+                        <td className="p-4 text-gray-500">{formatDate(certificate.endDate)}</td>
                         <td className="p-4">
                           <div className="flex items-center justify-center gap-2">
                             <button
-                              onClick={() => { setSelectedQRStudent(student); setIsQRModalOpen(true); }}
+                              onClick={() => { setSelectedQRCertificate(certificate); setIsQRModalOpen(true); }}
                               className="p-1.5 text-gray-600 hover:text-[#2D5F5D] hover:bg-gray-100 rounded-lg transition-all cursor-pointer"
                               title="Download/View QR Code"
                             >
                               <QrCode className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => { setEditingStudent(student); setIsFormModalOpen(true); }}
+                              onClick={() => { setEditingCertificate(certificate); setIsFormModalOpen(true); }}
                               className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-all cursor-pointer"
                               title="Edit Record"
                             >
                               <Edit className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleDeleteClick(student)}
+                              onClick={() => handleDeleteClick(certificate)}
                               className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-all cursor-pointer"
                               title="Delete Record"
                             >
@@ -431,17 +453,18 @@ export default function AdminDashboardPage() {
       </div>
 
       {isFormModalOpen && (
-        <StudentFormModal 
-          student={editingStudent}
-          existingStudents={students}
+        <CertificateFormModal
+          certificate={editingCertificate}
+          existingCertificates={certificates}
+
           onClose={() => setIsFormModalOpen(false)}
-          onSave={handleSaveStudent}
+          onSave={handleSaveCertificate}
         />
       )}
 
-      {isQRModalOpen && selectedQRStudent && (
-        <QRCodeModal 
-          student={selectedQRStudent}
+      {isQRModalOpen && selectedQRCertificate && (
+        <QRCodeModal
+          certificate={selectedQRCertificate}
           onClose={() => setIsQRModalOpen(false)}
         />
       )}
