@@ -1,21 +1,22 @@
-"use client"; // Important if using Next.js App Router
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { X, Save, AlertCircle, RefreshCw } from 'lucide-react';
-import { Student } from '@/lib/db/schema';
+import { Certificate } from '@/lib/db/schema';
 
-interface StudentFormModalProps {
-  student: Student | null; // Null if adding, Student if editing
-  existingStudents: Student[];
+interface CertificateFormModalProps {
+  certificate: Certificate | null; // Null if adding, Certificate if editing
+  existingCertificates: Certificate[];
   onClose: () => void;
-  onSave: (student: Student) => void;
+  onSave: (certificate: Certificate) => void;
 }
 
-export default function StudentFormModal({ student, existingStudents, onClose, onSave }: StudentFormModalProps) {
-  const isEdit = !!student;
+export default function CertificateFormModal({ certificate, existingCertificates, onClose, onSave }: CertificateFormModalProps) {
+  const isEdit = !!certificate;
   
-  // We use 'id' in state for the input field, but it maps to 'studentId' in the DB schema
-  const [id, setId] = useState('');
+  // State maps to the new schema
+  const [id, setId] = useState(''); // Maps to certificateId
+  const [role, setRole] = useState('student'); // New Role field
   const [name, setName] = useState('');
   const [courseName, setCourseName] = useState('');
   const [batchNo, setBatchNo] = useState('');
@@ -24,30 +25,38 @@ export default function StudentFormModal({ student, existingStudents, onClose, o
   
   const [error, setError] = useState('');
 
-  // Suggestions for auto ID
-  const createSuggestedId = () => {
+  // Suggestions for auto ID based on role
+  const createSuggestedId = (currentRole: string) => {
     const years = new Date().getFullYear();
     const randomNum = Math.floor(100 + Math.random() * 900);
-    return `ST-${years}-${randomNum}`;
+    const prefix = currentRole === 'mentor' ? 'MNT' : 'DGL';
+    return `${prefix}-${years}-${randomNum}`;
   };
 
   const suggestNewId = () => {
-    setId(createSuggestedId());
+    setId(createSuggestedId(role));
   };
+
+  // Update auto-ID if role changes while adding new record
+  useEffect(() => {
+    if (!isEdit && !id) {
+      setId(createSuggestedId(role));
+    }
+  }, [role, isEdit]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      if (student) {
-        // Safely access studentId (fallback to id if types get mixed up during transition)
-        setId(student.studentId);
-        setName(student.name);
-        setCourseName(student.courseName);
-        setBatchNo(student.batchNo);
-        setStartDate(student.startDate);
-        setEndDate(student.endDate);
+      if (certificate) {
+        setId(certificate.certificateId);
+        setRole(certificate.role || 'student');
+        setName(certificate.name);
+        setCourseName(certificate.courseName);
+        setBatchNo(certificate.batchNo);
+        setStartDate(certificate.startDate);
+        setEndDate(certificate.endDate);
       } else {
-        // Pre-fill with empty or auto suggest
-        setId(createSuggestedId());
+        setId(createSuggestedId('student'));
+        setRole('student');
         setName('');
         setCourseName('');
         setBatchNo('');
@@ -58,7 +67,7 @@ export default function StudentFormModal({ student, existingStudents, onClose, o
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-  }, [student]);
+  }, [certificate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,19 +81,18 @@ export default function StudentFormModal({ student, existingStudents, onClose, o
 
     const idPattern = /^[a-zA-Z0-9_\-]+$/;
     if (!idPattern.test(id)) {
-      setError('Student ID must only contain letters, numbers, hyphens or underscores.');
+      setError('Certificate ID must only contain letters, numbers, hyphens or underscores.');
       return;
     }
 
     // Check if ID is unique when adding
     if (!isEdit) {
-      // Safely convert to String to prevent .toLowerCase() crash on numeric IDs
-      const idExists = existingStudents.some(
-        s => String(s.studentId || s.id).trim().toLowerCase() === id.trim().toLowerCase()
+      const idExists = existingCertificates.some(
+        c => String(c.certificateId).trim().toLowerCase() === id.trim().toLowerCase()
       );
       
       if (idExists) {
-        setError(`Student ID "${id}" already exists. Please choose a unique ID.`);
+        setError(`Certificate ID "${id}" already exists. Please choose a unique ID.`);
         return;
       }
     }
@@ -95,18 +103,19 @@ export default function StudentFormModal({ student, existingStudents, onClose, o
       return;
     }
 
-    // Construct the object to match your Drizzle schema
-    const savedStudent = {
-      ...student, // Spreading retains the numeric DB 'id' and 'createdAt' if we are in Edit mode
-      studentId: id.trim(),
+    // Construct the object to match your new Drizzle schema
+    const savedCertificate = {
+      ...certificate, // Spreading retains numeric DB 'id' and 'createdAt' in Edit mode
+      certificateId: id.trim(),
+      role,
       name: name.trim(),
       courseName: courseName.trim(),
       batchNo: batchNo.trim(),
       startDate,
       endDate,
-    } as Student;
+    } as Certificate;
 
-    onSave(savedStudent);
+    onSave(savedCertificate);
   };
 
   return (
@@ -115,7 +124,7 @@ export default function StudentFormModal({ student, existingStudents, onClose, o
         {/* Header */}
         <div className="bg-[#1B3A5C] px-6 py-4 flex items-center justify-between text-white">
           <h3 className="text-lg font-bold tracking-wide">
-            {isEdit ? 'Edit Student Certificate' : 'Add New Student Certificate'}
+            {isEdit ? 'Edit Registry Record' : 'Add New Registry Record'}
           </h3>
           <button 
             onClick={onClose}
@@ -135,10 +144,29 @@ export default function StudentFormModal({ student, existingStudents, onClose, o
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Student ID */}
+            
+            {/* Role Selection (New) */}
             <div className="md:col-span-2">
               <label className="block text-xs font-semibold text-[#1B3A5C] uppercase tracking-wider mb-1.5">
-                Student ID / Certificate ID
+                Role
+              </label>
+              <select
+                value={role}
+                onChange={(e) => {
+                  setRole(e.target.value);
+                  if (!isEdit) setId(createSuggestedId(e.target.value)); // Auto-update ID prefix if adding
+                }}
+                className="w-full px-3 py-2.5 bg-[#FAF8F5] border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5F5D] focus:border-[#2D5F5D] transition-all text-sm outline-none font-medium text-gray-700"
+              >
+                <option value="student">Student</option>
+                <option value="mentor">Mentor</option>
+              </select>
+            </div>
+
+            {/* Certificate ID */}
+            <div className="md:col-span-2">
+              <label className="block text-xs font-semibold text-[#1B3A5C] uppercase tracking-wider mb-1.5">
+                Certificate ID
               </label>
               <div className="flex gap-2">
                 <input
@@ -147,8 +175,8 @@ export default function StudentFormModal({ student, existingStudents, onClose, o
                   onChange={(e) => setId(e.target.value)}
                   disabled={isEdit}
                   required
-                  placeholder="e.g. ST-2026-042"
-                  className="flex-1 px-3 py-2.5 bg-[#FAF8F5] border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5F5D] focus:border-[#2D5F5D] transition-all text-sm outline-none disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+                  placeholder="e.g. DGL-2026-042"
+                  className="flex-1 px-3 py-2.5 bg-[#FAF8F5] border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5F5D] focus:border-[#2D5F5D] transition-all text-sm outline-none disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed font-mono"
                 />
                 {!isEdit && (
                   <button
@@ -166,7 +194,7 @@ export default function StudentFormModal({ student, existingStudents, onClose, o
               </p>
             </div>
 
-            {/* Student Name */}
+            {/* Full Name */}
             <div className="md:col-span-2">
               <label className="block text-xs font-semibold text-[#1B3A5C] uppercase tracking-wider mb-1.5">
                 Full Name
@@ -184,7 +212,7 @@ export default function StudentFormModal({ student, existingStudents, onClose, o
             {/* Course Name */}
             <div className="md:col-span-2">
               <label className="block text-xs font-semibold text-[#1B3A5C] uppercase tracking-wider mb-1.5">
-                Course Name
+                {role === 'mentor' ? 'Mentorship Program / Course' : 'Course Name'}
               </label>
               <input
                 type="text"
@@ -214,7 +242,7 @@ export default function StudentFormModal({ student, existingStudents, onClose, o
             {/* Start Date */}
             <div>
               <label className="block text-xs font-semibold text-[#1B3A5C] uppercase tracking-wider mb-1.5">
-                Course Start Date
+                Start Date
               </label>
               <input
                 type="date"
@@ -228,7 +256,7 @@ export default function StudentFormModal({ student, existingStudents, onClose, o
             {/* End Date */}
             <div>
               <label className="block text-xs font-semibold text-[#1B3A5C] uppercase tracking-wider mb-1.5">
-                Course End Date
+                End Date
               </label>
               <input
                 type="date"
@@ -254,7 +282,7 @@ export default function StudentFormModal({ student, existingStudents, onClose, o
               className="px-5 py-2.5 bg-[#2D5F5D] hover:bg-[#204543] text-white font-medium rounded-xl transition-all text-sm flex items-center gap-2 cursor-pointer shadow-md"
             >
               <Save className="w-4 h-4" />
-              {isEdit ? 'Save Changes' : 'Generate Certificate'}
+              {isEdit ? 'Save Changes' : 'Generate Record'}
             </button>
           </div>
         </form>

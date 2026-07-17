@@ -7,19 +7,19 @@ import { useState } from 'react';
 import { X, Download, Copy, Check, QrCode } from 'lucide-react';
 
 import { TRAINING_CENTER_NAME } from '../utils';
-import { Student } from '@/lib/db/schema';
+import { Certificate, Student } from '@/lib/db/schema';
 
 interface QRCodeModalProps {
-  student: Student;
+  certificate: Certificate;
   onClose: () => void;
 }
 
-export default function QRCodeModal({ student, onClose }: QRCodeModalProps) {
+export default function QRCodeModal({ certificate, onClose }: QRCodeModalProps) {
   const [copied, setCopied] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
   // Generate the actual verification link using location hash routing
-  const verifyUrl = `${window.location.origin}/certificate/verify/${student.studentId}`;
+  const verifyUrl = `${window.location.origin}/certificate/verify/${certificate.certificateId}`;
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(verifyUrl)}`;
 
   const handleCopyLink = () => {
@@ -38,7 +38,7 @@ export default function QRCodeModal({ student, onClose }: QRCodeModalProps) {
       
       const link = document.createElement('a');
       link.href = url;
-      link.download = `QR_Verify_${student.id}_${student.name.replace(/\s+/g, '_')}.png`;
+      link.download = `QR_Verify_${certificate.certificateId}_${certificate.name.replace(/\s+/g, '_')}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -76,16 +76,16 @@ export default function QRCodeModal({ student, onClose }: QRCodeModalProps) {
         {/* Content */}
         <div className="p-6 text-center space-y-6 relative z-10">
           <div>
-            <h4 className="font-bold text-gray-800 text-base">{student.name}</h4>
-            <p className="text-xs text-gray-500 mt-0.5">{student.courseName}</p>
-            <p className="text-[10px] text-gray-400 mt-0.5">ID: {student.id}</p>
+            <h4 className="font-bold text-gray-800 text-base">{certificate.name}</h4>
+            <p className="text-xs text-gray-500 mt-0.5">{certificate.courseName}</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">ID: {certificate.certificateId}</p>
           </div>
 
           {/* QR Code Container */}
           <div className="mx-auto w-48 h-48 bg-[#FAF8F5] p-3 rounded-2xl border border-gray-100 flex items-center justify-center shadow-inner relative group">
             <img 
               src={qrImageUrl} 
-              alt={`QR Code for ${student.name}`} 
+              alt={`QR Code for ${certificate.name}`} 
               className="w-full h-full object-contain rounded-lg transition-transform duration-300 group-hover:scale-105"
               crossOrigin="anonymous"
               loading="lazy"
@@ -108,7 +108,7 @@ export default function QRCodeModal({ student, onClose }: QRCodeModalProps) {
             </div>
             
             <p className="text-[11px] text-gray-400 leading-relaxed px-2">
-              Scan this QR code using a smartphone camera to instantly verify the authenticity of {student.name}&apos;s credentials at {TRAINING_CENTER_NAME}.
+              Scan this QR code using a smartphone camera to instantly verify the authenticity of {certificate.name}&apos;s credentials at {TRAINING_CENTER_NAME}.
             </p>
           </div>
 
