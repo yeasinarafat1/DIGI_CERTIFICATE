@@ -2,19 +2,19 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Award, 
-  Search, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  QrCode, 
-  LogOut, 
-  Users, 
-  FolderGit, 
+import {
+  Award,
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  QrCode,
+  LogOut,
+  Users,
+  FolderGit,
   GraduationCap,
-  ArrowUpDown, 
-  ChevronLeft, 
+  ArrowUpDown,
+  ChevronLeft,
   ChevronRight,
   User,
   ExternalLink,
@@ -26,11 +26,11 @@ import StudentFormModal from '@/components/CertificateFormModal'; // Consider re
 import QRCodeModal from '@/components/QRCodeModal';
 
 // Import the updated certificate actions
-import { 
-  addCertificateAction, 
-  deleteCertificateAction, 
-  getCertificatesAction, 
-  updateCertificateAction 
+import {
+  addCertificateAction,
+  deleteCertificateAction,
+  getCertificatesAction,
+  updateCertificateAction
 } from '@/lib/action/certificate';
 import { Certificate } from '@/lib/db/schema';
 import { signOut, useSession } from '@/lib/auth-client';
@@ -43,11 +43,11 @@ type SortOrder = 'asc' | 'desc';
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { data: session, isPending: sessionPending } = useSession();
-  
+
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [activeTab, setActiveTab] = useState<'certificates' | 'overview'>('certificates');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const [sortField, setSortField] = useState<SortField>('certificateId');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -71,7 +71,7 @@ export default function AdminDashboardPage() {
         console.error("Failed to load certificates:", result.message);
       }
     };
-    
+
     loadInitialData();
   }, [sessionPending, session?.user]);
 
@@ -93,8 +93,8 @@ export default function AdminDashboardPage() {
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(c => 
-        String(c.certificateId).toLowerCase().includes(q) || 
+      result = result.filter(c =>
+        String(c.certificateId).toLowerCase().includes(q) ||
         c.name.toLowerCase().includes(q) ||
         c.role.toLowerCase().includes(q) ||
         c.courseName.toLowerCase().includes(q) ||
@@ -105,7 +105,7 @@ export default function AdminDashboardPage() {
     result.sort((a, b) => {
       const valA = String(a[sortField]).toLowerCase();
       const valB = String(b[sortField]).toLowerCase();
-      
+
       if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
       if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
       return 0;
@@ -118,8 +118,10 @@ export default function AdminDashboardPage() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return processedCertificates.slice(startIndex, startIndex + itemsPerPage);
   }, [processedCertificates, currentPage]);
-
   const totalPages = Math.max(1, Math.ceil(processedCertificates.length / itemsPerPage));
+  useEffect(() => {
+    setCurrentPage(page => Math.min(page, totalPages));
+  }, [totalPages]);
 
   const handleLogout = async () => {
     await signOut();
@@ -127,14 +129,14 @@ export default function AdminDashboardPage() {
   };
 
   const handleSaveCertificate: (savedCertificate: Certificate) => Promise<void> = async (savedCertificate: Certificate) => {
-    const isEditMode = !!savedCertificate.id; 
-    
+    const isEditMode = !!savedCertificate.id;
+
     if (isEditMode) {
       // --- EDIT MODE ---
       try {
         const result = await updateCertificateAction({
-          id: savedCertificate.id, 
-          certificateId: savedCertificate.certificateId, 
+          id: savedCertificate.id,
+          certificateId: savedCertificate.certificateId,
           role: savedCertificate.role, // Pass the new role field
           name: savedCertificate.name,
           courseName: savedCertificate.courseName,
@@ -159,7 +161,7 @@ export default function AdminDashboardPage() {
       // --- ADD MODE ---
       try {
         const result = await addCertificateAction({
-          certificateId: savedCertificate.certificateId, 
+          certificateId: savedCertificate.certificateId,
           role: savedCertificate.role, // Pass the new role field
           name: savedCertificate.name,
           courseName: savedCertificate.courseName,
@@ -220,11 +222,10 @@ export default function AdminDashboardPage() {
           <nav className="flex-1 px-4 py-6 space-y-1">
             <button
               onClick={() => setActiveTab('certificates')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-left cursor-pointer ${
-                activeTab === 'certificates' 
-                  ? 'bg-[#2D5F5D] text-white shadow-md' 
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-left cursor-pointer ${activeTab === 'certificates'
+                  ? 'bg-[#2D5F5D] text-white shadow-md'
                   : 'text-gray-300 hover:bg-white/5 hover:text-white'
-              }`}
+                }`}
             >
               <BadgeCheck className="w-4 h-4" />
               Registry Records
@@ -249,7 +250,7 @@ export default function AdminDashboardPage() {
                 <p className="text-[10px] text-gray-400 truncate">{session?.user.email || 'Signed in'}</p>
               </div>
             </div>
-            
+
             <button
               onClick={handleLogout}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-900/30 hover:bg-red-900/50 text-red-200 hover:text-red-100 rounded-xl text-xs font-semibold transition-all border border-red-500/10 cursor-pointer"
@@ -327,7 +328,7 @@ export default function AdminDashboardPage() {
                   className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5F5D] focus:border-[#2D5F5D] transition-all text-xs outline-none shadow-sm"
                 />
               </div>
-              
+
               <div className="text-xs text-gray-400 font-medium">
                 Showing {processedCertificates.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, processedCertificates.length)} of {processedCertificates.length} entries
               </div>
@@ -373,11 +374,10 @@ export default function AdminDashboardPage() {
                       <tr key={certificate.id} className="hover:bg-gray-50/50 transition-colors">
                         <td className="p-4 font-mono font-bold text-[#1B3A5C]">{certificate.certificateId}</td>
                         <td className="p-4">
-                          <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md ${
-                            certificate.role === 'mentor' 
-                              ? 'bg-amber-100 text-amber-800 border border-amber-200' 
+                          <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md ${certificate.role === 'mentor'
+                              ? 'bg-amber-100 text-amber-800 border border-amber-200'
                               : 'bg-[#8FBC9A]/20 text-[#2D5F5D] border border-[#8FBC9A]/30'
-                          }`}>
+                            }`}>
                             {certificate.role}
                           </span>
                         </td>
@@ -453,17 +453,17 @@ export default function AdminDashboardPage() {
       </div>
 
       {isFormModalOpen && (
-        <CertificateFormModal 
+        <CertificateFormModal
           certificate={editingCertificate}
           existingCertificates={certificates}
-         
+
           onClose={() => setIsFormModalOpen(false)}
           onSave={handleSaveCertificate}
         />
       )}
 
       {isQRModalOpen && selectedQRCertificate && (
-        <QRCodeModal 
+        <QRCodeModal
           certificate={selectedQRCertificate}
           onClose={() => setIsQRModalOpen(false)}
         />

@@ -18,6 +18,8 @@ export default function PublicVerifyPage() {
   const [certificate, setCertificate] = useState<Certificate | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<'not_found' | 'verification_unavailable' | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     const verifyCredential = async () => {
@@ -25,18 +27,22 @@ export default function PublicVerifyPage() {
         router.replace('/');
         return;
       }
+
       const result = await getCertificateByIdAction(urlId);
       if (result.success) {
         setCertificate(result.data as unknown as Certificate);
         setError(null);
+        setErrorCode(null);
       } else {
         setCertificate(null);
-        setError(result.message!);
+        setError(result.message ?? null);
+        setErrorCode(result.errorCode ?? 'verification_unavailable');
       }
       setIsLoaded(true);
     };
-    verifyCredential();
-  }, [urlId, router]);
+
+    void verifyCredential();
+  }, [urlId, router, retryCount]);
 
   if (!isLoaded && urlId) return null;
 
@@ -76,10 +82,20 @@ export default function PublicVerifyPage() {
             </div>
           </div>
         ) : (
-          /* Case: Not Found */
           <div className="w-full bg-white rounded-2xl shadow-xl p-8 text-center">
             <AlertCircle className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-xl font-bold">Record Not Found</h3>
+            {errorCode === 'not_found' ? (
+              <>
+                <h3 className="text-xl font-bold">Record Not Found</h3>
+                <p className="mt-2 text-sm text-gray-600">No certificate could be found for this ID.</p>
+              </>
+            ) : (
+              <>
+                <h3 className="text-xl font-bold">Verification Unavailable</h3>
+                <p className="mt-2 text-sm text-gray-600">{error ?? 'We could not verify this credential right now. Please try again in a moment.'}</p>
+                <button onClick={() => setRetryCount((count) => count + 1)} className="mt-4 mr-2 py-2 px-6 bg-[#2D5F5D] text-white rounded-xl text-xs">Try Again</button>
+              </>
+            )}
             <button onClick={() => router.push('/')} className="mt-4 py-2 px-6 bg-[#2D5F5D] text-white rounded-xl text-xs">Return Home</button>
           </div>
         )}

@@ -91,6 +91,7 @@ export async function getCertificateByIdAction(certificateId: string) {
     if (!certificate) {
       return {
         success: false,
+        errorCode: 'not_found' as const,
         message: 'No certificate found matching this ID.',
         data: null,
       };
@@ -104,6 +105,7 @@ export async function getCertificateByIdAction(certificateId: string) {
     console.error('Database error during verification:', error);
     return {
       success: false,
+      errorCode: 'verification_unavailable' as const,
       message: 'A technical error occurred while verifying the credential.',
       data: null,
     };
@@ -163,6 +165,13 @@ export async function updateCertificateAction(data: UpdateCertificateInput) {
       })
       .where(eq(certificates.id, data.id))
       .returning();
+
+    if (!updatedCertificate) {
+      return {
+        success: false,
+        message: 'An unexpected error occurred while updating the record.',
+      };
+    }
 
     // 2. Clear the cache
     revalidatePath('/admin/dashboard');
