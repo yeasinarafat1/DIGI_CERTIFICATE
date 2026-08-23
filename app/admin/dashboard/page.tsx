@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import  { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Award,
@@ -35,6 +35,7 @@ import {
 import { Certificate } from '@/lib/db/schema';
 import { signOut, useSession } from '@/lib/auth-client';
 import CertificateFormModal from '@/components/CertificateFormModal';
+import SideBar from '@/components/admin/SideBar';
 
 // Updated sort fields to match the new schema
 type SortField = 'certificateId' | 'role' | 'name' | 'courseName' | 'batchNo' | 'startDate' | 'endDate';
@@ -206,60 +207,7 @@ export default function AdminDashboardPage() {
   return (
     <>
       <div className="min-h-screen bg-[#FAF8F5] flex flex-col md:flex-row">
-        <aside className="w-full md:w-64 bg-[#1B3A5C] text-white flex flex-col shrink-0 md:min-h-screen">
-          <div className="p-6 border-b border-white/10">
-            <div className="flex items-center gap-3">
-              <div className="bg-[#FAF8F5]/10 p-2 rounded-xl backdrop-blur-sm">
-                <Award className="w-6 h-6 text-[#8FBC9A]" />
-              </div>
-              <div>
-                <h1 className="font-bold text-sm tracking-wider uppercase">Apex Registry</h1>
-                <p className="text-[10px] text-gray-400">Admin Control Panel</p>
-              </div>
-            </div>
-          </div>
-
-          <nav className="flex-1 px-4 py-6 space-y-1">
-            <button
-              onClick={() => setActiveTab('certificates')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-left cursor-pointer ${activeTab === 'certificates'
-                  ? 'bg-[#2D5F5D] text-white shadow-md'
-                  : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                }`}
-            >
-              <BadgeCheck className="w-4 h-4" />
-              Registry Records
-            </button>
-
-            <button
-              onClick={() => router.push('/')}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-all text-left cursor-pointer"
-            >
-              <ExternalLink className="w-4 h-4 text-gray-400" />
-              View Public Site
-            </button>
-          </nav>
-
-          <div className="p-4 border-t border-white/10 bg-[#12273F]">
-            <div className="flex items-center gap-3 mb-3 px-2">
-              <div className="w-8 h-8 rounded-full bg-[#2D5F5D] flex items-center justify-center text-white font-bold text-sm">
-                AD
-              </div>
-              <div className="overflow-hidden">
-                <p className="text-xs font-semibold truncate text-white">{session?.user.name || 'Administrator'}</p>
-                <p className="text-[10px] text-gray-400 truncate">{session?.user.email || 'Signed in'}</p>
-              </div>
-            </div>
-
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-900/30 hover:bg-red-900/50 text-red-200 hover:text-red-100 rounded-xl text-xs font-semibold transition-all border border-red-500/10 cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              Sign Out
-            </button>
-          </div>
-        </aside>
+        <SideBar/>
 
         <main className="flex-1 overflow-y-auto p-4 md:p-8 relative">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">

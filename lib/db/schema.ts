@@ -1,5 +1,5 @@
 
-import { boolean, date, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { boolean, date, integer, jsonb, numeric, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
 // db/schema.ts
 export const user = pgTable("user", {
@@ -85,3 +85,20 @@ export const certificates = pgTable('certificates', {
 });
 
 export type Certificate = typeof certificates.$inferSelect;
+
+
+export const mentors = pgTable('mentors', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  roleTitle: varchar('role_title', { length: 255 }), 
+  designation: varchar('designation', { length: 255 }), 
+  yearsExperience: integer('years_experience').default(0),
+  studentsCoached: integer('students_coached').default(0),
+  rating: numeric('rating', { precision: 2, scale: 1 }).default('0.0'),
+  biography: text('biography'),
+  specialties: jsonb('specialties').$type<string[]>().default([]),
+  avatarUrl: varchar('avatar_url', { length: 512 }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+export type Mentor = typeof mentors.$inferSelect;

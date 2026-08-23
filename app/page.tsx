@@ -1,65 +1,220 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+
+
+import React, { useState, useEffect } from 'react';
+import { 
+  Course, 
+  Mentor, 
+  StudentReview, 
+  CardOffer 
+} from '@/types';
+import { 
+  getCourses, 
+  saveCourses, 
+  getReviews, 
+  saveReviews,
+  INSTITUTE_NAME 
+} from '@/utils/index';
+import { INITIAL_COURSES, STUDENT_REVIEWS } from '@/utils/data';
+
+// Sub-components
+import Navbar from '@/components/Home/Navbar';
+import HeroSection from '@/components/Home/HeroSection';
+import AboutSection from '@/components/Home/AboutSection';
+import CoursesSection from '@/components/Home/CoursesSection';
+import LearningStepsSection from '@/components/Home/LearningStepsSection';
+import MentorsSection from '@/components/Home/MentorsSection';
+
+import ReviewsSection from '@/components/Home/ReviewsSection';
+import ContactSection from '@/components/Home/ContactSection';
+
+import Footer from '@/components/Home/Footer';
+
+// Modals
+import AdminCourseModal from '@/components/Home/AdminCourseModal';
+import CourseDetailsModal from '@/components/Home/CourseDetailsModal';
+import EnrollmentModal from '@/components/Home/EnrollmentModal';
+import ReviewModal from '@/components/Home/ReviewModal';
+import MentorModal from '@/components/Home/MentorModal';
+
+export default function HomePage() {
+  // Courses state
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [activeCategory, setActiveCategory] = useState<string>('All');
+
+  // Reviews state
+  const [reviews, setReviews] = useState<StudentReview[]>([]);
+
+  // Modal active states
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [selectedCourseForDetails, setSelectedCourseForDetails] = useState<Course | null>(null);
+  const [selectedCourseForEnroll, setSelectedCourseForEnroll] = useState<Course | null>(null);
+  const [selectedOfferForEnroll, setSelectedOfferForEnroll] = useState<CardOffer | null>(null);
+  const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
+
+  // Initialize data from localStorage or defaults
+  // Running this in useEffect ensures it only happens on the client, avoiding hydration mismatches
+  useEffect(() => {
+    setCourses(getCourses());
+    setReviews(getReviews());
+  }, []);
+
+  // Course handlers
+  const handleSaveCourse = (savedCourse: Course) => {
+    let updated: Course[];
+    const exists = courses.some(c => c.id === savedCourse.id);
+    if (exists) {
+      updated = courses.map(c => c.id === savedCourse.id ? savedCourse : c);
+    } else {
+      updated = [savedCourse, ...courses];
+    }
+    setCourses(updated);
+    saveCourses(updated);
+  };
+
+  const handleDeleteCourse = (courseId: string) => {
+    const updated = courses.filter(c => c.id !== courseId);
+    setCourses(updated);
+    saveCourses(updated);
+  };
+
+  const handleResetCourses = () => {
+    setCourses(INITIAL_COURSES);
+    saveCourses(INITIAL_COURSES);
+  };
+
+  // Review handler
+  const handleAddReview = (newReview: StudentReview) => {
+    const updated = [newReview, ...reviews];
+    setReviews(updated);
+    saveReviews(updated);
+  };
+
+  // Open Enrollment with course
+  const handleOpenEnrollWithCourse = (course?: Course) => {
+    setSelectedCourseForEnroll(course || null);
+    setSelectedOfferForEnroll(null);
+    setIsEnrollModalOpen(true);
+  };
+
+
+  // Search from hero
+  const handleHeroSearch = (category: string) => {
+    if (category && category !== 'All') {
+      setActiveCategory(category);
+    } else {
+      setActiveCategory('All');
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="min-h-screen bg-white text-slate-900 flex flex-col selection:bg-[#0E2954]/10 selection:text-[#0E2954]">
+      
+      {/* 1. Header / Navbar */}
+      <Navbar 
+        onOpenAdmin={() => setIsAdminOpen(true)}
+        onOpenEnroll={() => handleOpenEnrollWithCourse()}
+      />
+
+      {/* Main Serial Landing Page Flow */}
+      <main className="flex-1">
+        
+        {/* 2. Hero Section */}
+        <HeroSection 
+          onSearchCourse={handleHeroSearch}
+          onOpenEnroll={() => handleOpenEnrollWithCourse()}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+
+        {/* 3. About Institute / What We Do / Graduate Metrics */}
+        <AboutSection />
+
+        {/* 4. Popular Courses Section (with live Category Filters & Admin Trigger) */}
+        <CoursesSection 
+          courses={courses}
+          activeCategory={activeCategory}
+          onSelectCategory={setActiveCategory}
+          onOpenAdmin={() => setIsAdminOpen(true)}
+          onViewCourseDetails={(course) => setSelectedCourseForDetails(course)}
+          onEnrollCourse={(course) => handleOpenEnrollWithCourse(course)}
+        />
+
+        {/* 5. Serial Learning Steps & Card Offer Process */}
+        <LearningStepsSection 
+         
+        />
+
+        {/* 6. Mentors / Instructors Section */}
+        <MentorsSection 
+          onSelectMentor={(mentor) => setSelectedMentor(mentor)}
+        />
+
+      
+
+        {/* 8. Student Reviews & Testimonials Section */}
+        <ReviewsSection 
+          reviews={reviews}
+          onOpenAddReview={() => setIsReviewModalOpen(true)}
+        />
+
+        {/* 9. Contact / Get in Touch Section */}
+        <ContactSection />
+
+       
+
       </main>
+
+      {/* 11. Rich Royal Plum Footer */}
+      <Footer />
+
+      {/* ========================================== */}
+      {/* INTERACTIVE MODALS */}
+      {/* ========================================== */}
+
+      {/* 1. Admin Course Management Modal */}
+      <AdminCourseModal
+        isOpen={isAdminOpen}
+        courses={courses}
+        onClose={() => setIsAdminOpen(false)}
+        onSaveCourse={handleSaveCourse}
+        deleteCourse={handleDeleteCourse}
+        onResetCourses={handleResetCourses}
+      />
+
+      {/* 2. Course Details & Syllabus Modal */}
+      <CourseDetailsModal
+        course={selectedCourseForDetails}
+        onClose={() => setSelectedCourseForDetails(null)}
+        onEnroll={(course) => handleOpenEnrollWithCourse(course)}
+      />
+
+      {/* 3. Admission & Voucher Enrollment Modal */}
+      <EnrollmentModal
+        isOpen={isEnrollModalOpen}
+        initialCourse={selectedCourseForEnroll}
+        initialOffer={selectedOfferForEnroll}
+        courses={courses}
+        onClose={() => setIsEnrollModalOpen(false)}
+      />
+
+      {/* 4. Student Review Submission Modal */}
+      <ReviewModal
+        isOpen={isReviewModalOpen}
+        courses={courses}
+        onClose={() => setIsReviewModalOpen(false)}
+        onSubmitReview={handleAddReview}
+      />
+
+      {/* 5. Mentor Profile Modal */}
+      <MentorModal
+        mentor={selectedMentor}
+        courses={courses}
+        onClose={() => setSelectedMentor(null)}
+        onSelectCourse={(course) => setSelectedCourseForDetails(course)}
+      />
+
     </div>
   );
 }

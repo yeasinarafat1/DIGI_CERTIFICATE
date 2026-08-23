@@ -1,40 +1,72 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Outfit:wght@400;500;600;700;800&family=Great+Vibes&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Outfit", "Plus Jakarta Sans", sans-serif;
+  --font-cursive: "Great Vibes", cursive;
 
-  --color-primary: #1B3A5C;
-  --color-secondary: #2D5F5D;
-  --color-success: #1E8449;
-  --color-warm-bg: #FAF8F5;
-  --color-coral: #E8785A;
-  --color-mint: #8FBC9A;
+  --color-brand-navy: #0E2954;
+  --color-brand-navy-dark: #091E3E;
+  --color-brand-navy-light: #1A3E78;
+  --color-brand-red: #E5252A;
+  --color-brand-red-hover: #CC1E23;
+  --color-brand-red-light: #FFECEC;
+
+  --color-plum-900: #091E3E;
+  --color-plum-800: #0E2954;
+  --color-plum-700: #14376F;
+  --color-plum-600: #1A3E78;
+  --color-plum-100: #E6EEF9;
+  --color-plum-50: #F3F7FC;
+
+  --color-warm-bg: #FCFAF8;
+  --color-card-peach: #FCECD8;
+  --color-card-mint: #DAF4EE;
+  --color-card-green: #D7EACB;
+  --color-card-rose: #FDDCDC;
+  --color-card-purple: #ECE4FA;
+  --color-card-blue: #DCECF9;
+
+  --color-accent-orange: #FF6B35;
+  --color-accent-gold: #FFB703;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-warm-bg);
-  color: #2D3748;
+  background-color: #FFFFFF;
+  color: #1E293B;
+  scroll-behavior: smooth;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F8FAFC;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  50% {
+    transform: translateY(-8px);
   }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.animate-float {
+  animation: floatSlow 4s ease-in-out infinite;
 }
-

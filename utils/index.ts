@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Student } from '@/types';
+import { Course, Student, StudentReview } from '@/types';
+import { INITIAL_COURSES, STUDENT_REVIEWS } from './data';
 
 export const TRAINING_CENTER_NAME = "DigiLearning";
 
@@ -87,3 +88,51 @@ export function formatDate(dateStr: string): string {
     day: 'numeric'
   });
 }
+
+
+export const INSTITUTE_NAME = "DigiLearning";
+export const INSTITUTE_TAGLINE = "Premier Office Applications & Career Development Institute";
+export const INSTITUTE_ADDRESS = "Digital Complex, Level 4, Main Commercial Avenue";
+
+export function getCourses(): Course[] {
+  const data = localStorage.getItem('digilearning_courses') || localStorage.getItem('dizzy_courses');
+  if (!data) {
+    localStorage.setItem('digilearning_courses', JSON.stringify(INITIAL_COURSES));
+    return INITIAL_COURSES;
+  }
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    return INITIAL_COURSES;
+  }
+}
+
+export function saveCourses(courses: Course[]): void {
+  localStorage.setItem('digilearning_courses', JSON.stringify(courses));
+}
+
+export function getReviews(): StudentReview[] {
+  const data = localStorage.getItem('digilearning_reviews') || localStorage.getItem('dizzy_reviews');
+  if (!data) {
+    localStorage.setItem('digilearning_reviews', JSON.stringify(STUDENT_REVIEWS));
+    return STUDENT_REVIEWS;
+  }
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    return STUDENT_REVIEWS;
+  }
+}
+
+export function saveReviews(reviews: StudentReview[]): void {
+  localStorage.setItem('digilearning_reviews', JSON.stringify(reviews));
+}
+
+export function getAdminAuth(): boolean {
+  return localStorage.getItem('digilearning_admin_auth') === 'true' || localStorage.getItem('dizzy_admin_auth') === 'true';
+}
+
+export function setAdminAuth(auth: boolean): void {
+  localStorage.setItem('digilearning_admin_auth', auth ? 'true' : 'false');
+}
+
