@@ -179,7 +179,7 @@ export default function HomePage() {
         courses={courses}
         onClose={() => setIsAdminOpen(false)}
         onSaveCourse={handleSaveCourse}
-        deleteCourse={handleDeleteCourse}
+        onDeleteCourse={handleDeleteCourse}
         onResetCourses={handleResetCourses}
       />
 
