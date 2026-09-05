@@ -27,7 +27,8 @@ export type CourseCategory =
   | 'Advanced Excel'
   | 'Office Documentation'
   | 'Accounting & Tally'
-  | 'Typing & Speed';
+  | 'Typing & Speed'
+  | 'Graphics Design';
 
 export interface Course {
   id: string;
@@ -41,7 +42,8 @@ export interface Course {
   reviewsCount: number;
   badge?: string;
   bgColor: string; // Tailored pastel color matching demo (e.g., #FCECD8, #DAF4EE, etc.)
-  iconType: 'excel' | 'word' | 'powerpoint' | 'access' | 'accounting' | 'typing' | 'workspace' | 'suite';
+  iconType: 'excel' | 'word' | 'powerpoint' | 'access' | 'accounting' | 'typing' | 'workspace' | 'suite' | 
+  'graphics';
   description: string;
   syllabus: string[];
   instructorId: string;

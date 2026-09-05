@@ -12,7 +12,9 @@ import {
   Award,
   Globe,
   Sparkles,
-  Check
+  Check,
+  Mail,
+  PhoneCall
 } from 'lucide-react';
 import { INSTITUTE_NAME } from '@/utils/index';
 import Logo from './Logo';
@@ -45,15 +47,8 @@ export default function Footer() {
           {/* Column 1: Brand & Bio */}
           <div className="md:col-span-4 space-y-4">
             <div className="flex items-center gap-3">
-              <Logo size="md" />
-              <div className="flex flex-col">
-                <span className="text-xl font-extrabold tracking-tight text-white leading-none">
-                  Digi<span className="text-[#E5252A]">Learning</span>
-                </span>
-                <span className="text-[10px] text-slate-300 font-semibold tracking-wider uppercase mt-0.5">
-                  Office Applications Institute
-                </span>
-              </div>
+              <img src="/FOR FOOTER-01.svg" className='w-[200px]' alt="" />
+              
             </div>
 
             <p className="text-xs text-slate-300 max-w-sm leading-relaxed">
@@ -62,18 +57,16 @@ export default function Footer() {
 
             {/* Social Icons */}
             <div className="flex items-center gap-3 pt-2">
-              <a href="#hero" className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#E5252A] flex items-center justify-center text-white transition-colors">
-                <MessageCircle className="w-4 h-4" />
+              <a href="tel:+8801571424178" className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#E5252A] flex items-center justify-center text-white transition-colors">
+                <PhoneCall className="w-4 h-4" />
               </a>
-              <a href="#hero" className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#E5252A] flex items-center justify-center text-white transition-colors">
-                <Send className="w-4 h-4" />
+              <a href="mailto:digilearning25@gmail.com" className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#E5252A] flex items-center justify-center text-white transition-colors">
+                <Mail className="w-4 h-4" />
               </a>
-              <a href="#hero" className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#E5252A] flex items-center justify-center text-white transition-colors">
-                <Globe className="w-4 h-4" />
+              <a href="https://www.facebook.com/digilearning25" target='_blank' className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#E5252A] flex items-center justify-center text-white transition-colors">
+                <img src="/facebook.svg" className="w-8 h-8"alt="" />
               </a>
-              <a href="#hero" className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#E5252A] flex items-center justify-center text-white transition-colors">
-                <Sparkles className="w-4 h-4" />
-              </a>
+              
             </div>
           </div>
 

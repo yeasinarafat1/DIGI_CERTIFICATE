@@ -1,4 +1,5 @@
 
+import { relations } from "drizzle-orm/_relations";
 import { boolean, date, integer, jsonb, numeric, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
 // db/schema.ts
@@ -102,3 +103,54 @@ export const mentors = pgTable('mentors', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 export type Mentor = typeof mentors.$inferSelect;
+
+export const courses = pgTable('courses', {
+  id: serial('id').primaryKey(),
+  title: varchar('title', { length: 255 }).notNull(),
+  category: varchar('category', { length: 100 }), 
+  level: varchar('level', { length: 50 }), // e.g., 'Beginner Level'
+  
+  // Pricing (For offline enrollment display)
+  price: integer('price').notNull(), // e.g., 18
+  originalPrice: integer('original_price'), // e.g., 40
+  
+  // Course Metrics
+  classesCount: integer('classes_count').default(0), 
+  hoursCount: integer('hours_count').default(0), 
+  rating: numeric('rating', { precision: 2, scale: 1 }).default('0.0'), 
+  reviewsCount: integer('reviews_count').default(0),
+  
+  // UI / Display Fields
+  badge: varchar('badge', { length: 50 }), // e.g., 'ESSENTIAL', 'CAREER DIPLOMA'
+  bgColor: varchar('bg_color', { length: 20 }), // e.g., '#ECE4FA'
+  iconType: varchar('icon_type', { length: 50 }), 
+  isPopular: boolean('is_popular').default(false),
+  
+  // Detailed Content
+  description: text('description'), // Maps to 'COURSE OVERVIEW'
+  syllabus: jsonb('syllabus').$type<string[]>().default([]), // Maps to 'CURRICULUM & HANDS-ON MODULES'
+  
+  // FOREIGN KEY: Relationship to Mentors
+  mentorId: integer('mentor_id').references(() => mentors.id, { onDelete: 'set null' }),
+  
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- DRIZZLE RELATIONS (For easier querying) ---
+
+// This tells Drizzle: "One Mentor can have Many Courses"
+export const mentorsRelations = relations(mentors, ({ many }) => ({
+  courses: many(courses),
+}));
+
+// This tells Drizzle: "One Course belongs to One Mentor"
+export const coursesRelations = relations(courses, ({ one }) => ({
+  mentor: one(mentors, {
+    fields: [courses.mentorId],
+    references: [mentors.id],
+  }),
+}));
+
+// Export Types
+export type Course = typeof courses.$inferSelect;

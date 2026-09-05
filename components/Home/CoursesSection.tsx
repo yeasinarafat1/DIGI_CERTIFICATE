@@ -1,27 +1,17 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
 
-import React, { useState } from 'react';
 import { 
   Star, 
   Clock, 
   BookOpen, 
   Plus, 
-  ChevronRight, 
   FileSpreadsheet, 
   FileText, 
   Presentation, 
   Database, 
   Calculator, 
-  Keyboard, 
-  Sparkles,
-  ExternalLink,
-  CheckCircle2,
-  Users
+  Keyboard
 } from 'lucide-react';
-import { Course, CourseCategory } from '@/types';
+import { Course } from '@/types';
 
 interface CoursesSectionProps {
   courses: Course[];
@@ -41,15 +31,14 @@ export default function CoursesSection({
   onEnrollCourse
 }: CoursesSectionProps) {
   
-  const categories: { label: string; value: string }[] = [
+  // This automatically creates tabs based on the 4 courses in your data:
+  // "All Courses", "MS Office Suite", "Graphics Design", and "Typing & Speed"
+  const uniqueCategories = Array.from(new Set(courses.map(c => c.category)));
+  const categories = [
     { label: 'All Courses', value: 'All' },
-    { label: 'Advanced Excel', value: 'Advanced Excel' },
-    { label: 'Office Documentation', value: 'Office Documentation' },
-    { label: 'Accounting & Tally', value: 'Accounting & Tally' },
-    { label: 'MS Office Suite', value: 'MS Office Suite' },
-    { label: 'Typing & Speed', value: 'Typing & Speed' }
+    ...uniqueCategories.map(cat => ({ label: cat, value: cat }))
   ];
-
+  
   const filteredCourses = activeCategory === 'All' 
     ? courses 
     : courses.filter(c => c.category === activeCategory);
@@ -78,7 +67,7 @@ export default function CoursesSection({
     <section id="courses" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Section Header with Explore Action */}
+        {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6">
           <div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
@@ -89,26 +78,7 @@ export default function CoursesSection({
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Add Course Admin Shortcut */}
-            <button
-              onClick={onOpenAdmin}
-              id="courses-add-course-btn"
-              className="inline-flex items-center gap-1.5 px-4 py-2 border border-dashed border-[#0E2954]/40 text-[#0E2954] bg-[#0E2954]/5 hover:bg-[#0E2954]/10 rounded-xl text-xs font-bold transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5 text-[#E5252A]" />
-              <span>Add / Manage Courses</span>
-            </button>
-
-            {/* Explore Classes Button */}
-            <button
-              onClick={() => onSelectCategory('All')}
-              id="courses-explore-all-btn"
-              className="inline-flex items-center gap-1.5 px-4 py-2 border border-slate-300 text-slate-700 hover:border-[#0E2954] hover:text-[#0E2954] rounded-xl text-xs font-bold transition-colors shadow-xs"
-            >
-              <span>Explore All ({courses.length})</span>
-            </button>
-          </div>
+          
         </div>
 
         {/* Category Filters Bar */}
@@ -139,26 +109,22 @@ export default function CoursesSection({
                 key={course.id}
                 className="bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group transform hover:-translate-y-1"
               >
-                {/* Pastel Top Illustration Container */}
+                {/* Image / Header Block */}
                 <div 
                   className="h-44 w-full p-6 flex flex-col items-center justify-center relative overflow-hidden transition-transform duration-300 group-hover:scale-[1.02]"
                   style={{ backgroundColor: course.bgColor || '#FCECD8' }}
                 >
-                  {/* Subtle decorative circles */}
                   <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/30 pointer-events-none" />
                   <div className="absolute -bottom-6 -left-6 w-20 h-20 rounded-full bg-black/5 pointer-events-none" />
                   
-                  {/* Visual Graphic Representation */}
                   <div className="relative z-10 p-3 bg-white/80 backdrop-blur-xs rounded-2xl shadow-sm border border-white/60">
                     {getCourseIcon(course.iconType)}
                   </div>
 
-                  {/* Level Pill */}
                   <span className="absolute bottom-3 left-3 text-[10px] font-bold text-slate-700 bg-white/90 px-2 py-0.5 rounded-md shadow-xs">
                     {course.level}
                   </span>
 
-                  {/* Badge */}
                   {course.badge && (
                     <span className="absolute top-3 right-3 text-[9px] font-extrabold uppercase tracking-wider text-[#E5252A] bg-white/95 px-2.5 py-0.5 rounded-full shadow-xs">
                       {course.badge}
@@ -169,7 +135,6 @@ export default function CoursesSection({
                 {/* Card Content */}
                 <div className="p-5 flex-1 flex flex-col justify-between">
                   <div>
-                    {/* Category Label & Price Pill */}
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-xs font-semibold text-slate-500 truncate">
                         {course.category}
@@ -177,16 +142,15 @@ export default function CoursesSection({
                       <div className="flex items-center gap-1.5 shrink-0">
                         {course.originalPrice && (
                           <span className="text-xs text-slate-400 line-through font-normal">
-                            ${course.originalPrice}
+                            ৳{course.originalPrice}
                           </span>
                         )}
                         <span className="text-xs font-bold text-[#0E2954] bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
-                          ${course.price}
+                          ৳{course.price}
                         </span>
                       </div>
                     </div>
 
-                    {/* Course Title */}
                     <h3 
                       onClick={() => onViewCourseDetails(course)}
                       className="mt-3 font-bold text-base text-slate-900 line-clamp-2 leading-snug cursor-pointer group-hover:text-[#0E2954] transition-colors"
@@ -195,7 +159,6 @@ export default function CoursesSection({
                       {course.title}
                     </h3>
 
-                    {/* Instructor / Mentor note */}
                     <p className="mt-1.5 text-xs text-slate-500 flex items-center gap-1">
                       <span>Instructor:</span>
                       <span className="font-semibold text-slate-700">{course.instructorName}</span>
@@ -220,20 +183,14 @@ export default function CoursesSection({
                     </div>
                   </div>
 
-                  {/* Enroll & View Syllabus Buttons */}
-                  <div className="mt-4 grid grid-cols-2 gap-2 pt-1">
+                  <div className="mt-4 grid grid-cols-1 gap-2 pt-1">
                     <button
                       onClick={() => onViewCourseDetails(course)}
-                      className="w-full py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors text-center"
+                      className="w-full py-2 text-xs font-bold text-white bg-[#E5252A] hover:bg-[#CC1E23] rounded-lg transition-colors text-center"
                     >
                       Syllabus
                     </button>
-                    <button
-                      onClick={() => onEnrollCourse(course)}
-                      className="w-full py-2 text-xs font-bold text-white bg-[#E5252A] hover:bg-[#CC1E23] rounded-lg transition-colors text-center shadow-xs"
-                    >
-                      Enroll
-                    </button>
+                   
                   </div>
 
                 </div>
@@ -242,17 +199,15 @@ export default function CoursesSection({
           })}
         </div>
 
-        {/* Empty state fallback */}
         {filteredCourses.length === 0 && (
           <div className="text-center py-16 bg-slate-50 rounded-3xl mt-8 border border-dashed border-slate-300">
             <BookOpen className="w-12 h-12 text-slate-400 mx-auto" />
-            <h3 className="mt-3 text-lg font-bold text-slate-700">No courses in this category yet</h3>
-            <p className="mt-1 text-sm text-slate-500">You can add custom courses directly through the Admin Portal.</p>
+            <h3 className="mt-3 text-lg font-bold text-slate-700">No courses found in this category</h3>
             <button
-              onClick={onOpenAdmin}
+              onClick={() => onSelectCategory('All')}
               className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-[#0E2954] text-white text-xs font-semibold rounded-lg"
             >
-              <Plus className="w-4 h-4 text-[#E5252A]" /> Add New Course
+              View All Courses
             </button>
           </div>
         )}

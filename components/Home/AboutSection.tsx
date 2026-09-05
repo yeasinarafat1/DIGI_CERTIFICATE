@@ -79,7 +79,7 @@ export default function AboutSection() {
         </div>
 
         {/* Live Metrics / How many students finished the course */}
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        <div className="mt-12 grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           <div className="bg-white p-6 rounded-2xl border border-slate-200/70 shadow-xs text-center">
             <div className="text-3xl sm:text-4xl font-black text-[#0E2954]">
               {INSTITUTE_STATS.graduatedStudents}
@@ -116,17 +116,7 @@ export default function AboutSection() {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/70 shadow-xs text-center">
-            <div className="text-3xl sm:text-4xl font-black text-amber-500">
-              {INSTITUTE_STATS.googleRating}
-            </div>
-            <div className="mt-1.5 text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Google Student Rating
-            </div>
-            <div className="mt-2 text-[11px] text-slate-500 font-medium">
-              Over {INSTITUTE_STATS.totalReviews} verified reviews
-            </div>
-          </div>
+          
         </div>
 
         {/* 6 Feature Pillars */}

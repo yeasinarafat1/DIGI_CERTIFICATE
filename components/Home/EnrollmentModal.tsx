@@ -178,7 +178,7 @@ export default function EnrollmentModal({
               </div>
               <div className="flex justify-between text-slate-700">
                 <span>Tuition Total:</span>
-                <span className="font-bold text-emerald-700">${finalPrice}</span>
+                <span className="font-bold text-emerald-700">৳{finalPrice}</span>
               </div>
             </div>
 
@@ -316,17 +316,17 @@ export default function EnrollmentModal({
               {/* Price Calculation Box */}
               <div className="pt-3 border-t border-slate-200 flex items-center justify-between text-xs font-medium text-slate-600">
                 <span>Standard Tuition:</span>
-                <span>${basePrice}</span>
+                <span>৳{basePrice}</span>
               </div>
               {couponApplied && (
                 <div className="flex items-center justify-between text-xs font-semibold text-emerald-700">
                   <span>Card Discount ({discountPercent}%):</span>
-                  <span>-${discountAmount}</span>
+                  <span>-৳{discountAmount}</span>
                 </div>
               )}
               <div className="flex items-center justify-between text-sm font-bold text-slate-900 pt-1">
                 <span>Payable Amount:</span>
-                <span className="text-base text-[#0E2954] font-black">${finalPrice}</span>
+                <span className="text-base text-[#0E2954] font-black">৳{finalPrice}</span>
               </div>
             </div>
 

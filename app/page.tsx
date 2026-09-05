@@ -58,8 +58,8 @@ export default function HomePage() {
   // Initialize data from localStorage or defaults
   // Running this in useEffect ensures it only happens on the client, avoiding hydration mismatches
   useEffect(() => {
-    setCourses(getCourses());
-    setReviews(getReviews());
+    setCourses(INITIAL_COURSES);
+    setReviews(STUDENT_REVIEWS);
   }, []);
 
   // Course handlers
@@ -156,7 +156,7 @@ export default function HomePage() {
         {/* 8. Student Reviews & Testimonials Section */}
         <ReviewsSection 
           reviews={reviews}
-          onOpenAddReview={() => setIsReviewModalOpen(true)}
+          
         />
 
         {/* 9. Contact / Get in Touch Section */}
@@ -187,7 +187,7 @@ export default function HomePage() {
       <CourseDetailsModal
         course={selectedCourseForDetails}
         onClose={() => setSelectedCourseForDetails(null)}
-        onEnroll={(course) => handleOpenEnrollWithCourse(course)}
+       
       />
 
       {/* 3. Admission & Voucher Enrollment Modal */}

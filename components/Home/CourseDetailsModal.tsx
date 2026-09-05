@@ -22,13 +22,13 @@ import { Course } from '@/types';
 interface CourseDetailsModalProps {
   course: Course | null;
   onClose: () => void;
-  onEnroll: (course: Course) => void;
+ 
 }
 
 export default function CourseDetailsModal({
   course,
   onClose,
-  onEnroll
+ 
 }: CourseDetailsModalProps) {
   if (!course) return null;
 
@@ -132,31 +132,13 @@ export default function CourseDetailsModal({
           <div>
             <span className="text-xs text-slate-400 block font-medium">Tuition Investment</span>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-[#0E2954]">${course.price}</span>
+              <span className="text-2xl font-black text-[#0E2954]">৳{course.price}</span>
               {course.originalPrice && (
-                <span className="text-xs text-slate-400 line-through">${course.originalPrice}</span>
+                <span className="text-xs text-slate-400 line-through">৳{course.originalPrice}</span>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors"
-            >
-              Close
-            </button>
-            <button
-              onClick={() => {
-                onClose();
-                onEnroll(course);
-              }}
-              className="px-6 py-2.5 bg-[#E5252A] hover:bg-[#CC1E23] text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-1.5"
-            >
-              <span>Enroll in This Course</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
         </div>
 
       </div>

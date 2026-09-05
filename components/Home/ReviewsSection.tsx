@@ -9,10 +9,10 @@ import { StudentReview } from '@/types';
 
 interface ReviewsSectionProps {
   reviews: StudentReview[];
-  onOpenAddReview: () => void;
+  
 }
 
-export default function ReviewsSection({ reviews, onOpenAddReview }: ReviewsSectionProps) {
+export default function ReviewsSection({ reviews }: ReviewsSectionProps) {
   const [activePageIndex, setActivePageIndex] = useState(0);
 
   return (
@@ -30,15 +30,7 @@ export default function ReviewsSection({ reviews, onOpenAddReview }: ReviewsSect
             </p>
           </div>
 
-          {/* "Give Your Review" Button matching demo */}
-          <button
-            onClick={onOpenAddReview}
-            id="reviews-give-review-btn"
-            className="inline-flex items-center gap-1.5 px-4 py-2 border border-[#0E2954] text-[#0E2954] hover:bg-[#0E2954] hover:text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5 text-[#E5252A]" />
-            <span>Give Your Review</span>
-          </button>
+    
         </div>
 
         {/* Testimonials Cards Grid */}
@@ -98,13 +90,7 @@ export default function ReviewsSection({ reviews, onOpenAddReview }: ReviewsSect
           ))}
         </div>
 
-        {/* Carousel Pagination Dots */}
-        <div className="mt-10 flex items-center justify-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#0E2954]" />
-          <span className="w-2 h-2 rounded-full bg-slate-300" />
-          <span className="w-2 h-2 rounded-full bg-slate-300" />
-          <span className="w-2 h-2 rounded-full bg-slate-300" />
-        </div>
+       
 
       </div>
     </section>
