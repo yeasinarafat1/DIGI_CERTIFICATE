@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db'; // Adjust this path to where your db instance is exported
-import { certificates } from '@/lib/db/schema'; // Ensure you import the new certificates schema
+import { certificates, students } from '@/lib/db/schema'; // Ensure you import the new certificates schema
 import { desc, eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { requireAdmin, UnauthorizedAdminError } from '@/lib/auth/require-admin';
@@ -196,5 +196,43 @@ export async function updateCertificateAction(data: UpdateCertificateInput) {
       success: false,
       message: 'An unexpected error occurred while updating the record.',
     };
+  }
+}
+
+export async function verifyStudentAccess(studentId: string, courseTitle: string) {
+  try {
+    if (!studentId || studentId.trim() === '') {
+      return { success: false, message: 'Student ID is required.' };
+    }
+
+    // 1. Query the database to see if the student ID exists
+      // Look for the record where the certificateId column matches the input
+    const [studentRecord] = await db
+      .select()
+      .from(students)
+      .where(eq(students.studentId, studentId.trim()))
+      .limit(1);
+  
+
+    if (!studentRecord) {
+      return { 
+        success: false, 
+        message: 'Invalid Student ID. Please ensure you are enrolled or contact administration.' 
+      };
+    }
+
+    // 2. Return the success state along with the YouTube playlist URL
+    // You can customize this URL based on the courseTitle if you have multiple playlists
+    const playlistUrl = "https://www.youtube.com/playlist?list=PLQBhqUP90F0Q";
+
+    return { 
+      success: true, 
+      url: playlistUrl, 
+      message: 'Verification successful!' 
+    };
+
+  } catch (error) {
+    console.error('Failed to verify student:', error);
+    return { success: false, message: 'An error occurred during verification.' };
   }
 }
