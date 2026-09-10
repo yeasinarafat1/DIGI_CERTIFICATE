@@ -209,8 +209,8 @@ export async function verifyStudentAccess(studentId: string, courseTitle: string
       // Look for the record where the certificateId column matches the input
     const [studentRecord] = await db
       .select()
-      .from(students)
-      .where(eq(students.studentId, studentId.trim()))
+      .from(certificates)
+      .where(eq(certificates.certificateId, studentId.trim()))
       .limit(1);
   
 
